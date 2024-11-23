@@ -201,12 +201,13 @@ function resetBoard() {
 playArea.appendChild(gameBoard())
 
 
-// OLD INITIATION CODE
+// TEST BUTTON
 // let testButton = document.createElement("button")
 // testButton.textContent = "TEST"
 // playArea.appendChild(testButton)
 
 
+// OLD INITIATION CODE
 // document.addEventListener("load", function(){
     //     let board = document.createElement("table")
 //     for (let a = 0; a < 8; a++) {
@@ -220,6 +221,7 @@ playArea.appendChild(gameBoard())
 //     }
 //     playArea.appendChild(board)
 // });
+
 
 // OLD PIECES OBJECTS
 // let pieces = {"white":
@@ -264,6 +266,7 @@ playArea.appendChild(gameBoard())
 //     {"pawn8": "h7"}]
 // }
 
+
 // OLD ROOK CODE 
 // function rook(cell) {
 //     // puts the cells that are available for move in a list
@@ -285,6 +288,7 @@ playArea.appendChild(gameBoard())
 //     movePiece()
 // }
 
+
 // OLD MOVE PIECE CODE
 // function movePiece() {    
 //     // changes available move cells yellow
@@ -292,6 +296,7 @@ playArea.appendChild(gameBoard())
 //         availableCells[pendCellInd].style.backgroundColor = "rgb(255, 255, 0)"
 //     }    
 // }
+
 
 // POTENTIAL BISHOP CODE
 // while (true) {
