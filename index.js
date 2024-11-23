@@ -2,6 +2,7 @@ const playArea = document.getElementById("area");
 let cols = "abcdefgh"
 let allCells = []
 let availableCells = []
+let threatCells = []
 let curTurn = "white"
 let opp = "black"
 let pieces = {"white":
@@ -168,6 +169,7 @@ function collisions(cell) {
     for (let i = 0; i < pieces[opp].length; i++) { // if it runs into an opponents piece it turns the square red
         if (cell == pieces[opp][i][1]) {
             document.getElementById(cell).style.backgroundColor = "rgb(255, 0, 0)"
+            threatCells.push(cell)
             return true
         }
     }
