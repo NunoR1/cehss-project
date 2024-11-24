@@ -90,6 +90,7 @@ function gameBoard(){
 
 function whatsThatPiece(cell) {
     for (let i = 0; i < pieces[curTurn].length; i++) { // checks every piece in the piece dictionary
+        // only check what the piece is if the currently sellected cell is the second object of i list in the current turn object of pieces
         if (pieces[curTurn][i][1] == cell) {
             if (pieces[curTurn][i][0] == "rook") {
                 rook(cell)
@@ -126,33 +127,31 @@ function pawn(cell) {
 
 
 function rook(cell) {
-    let moveCell = cell
-    while (true) {
-        moveCell = moveCell[0] + (parseInt(moveCell[1]) + 1)
+    let moveCell
+    for (let i = parseInt(cell[1]) + 1; i != 9; i++) {
+        moveCell = cell[0] + i
         if (collisions(moveCell)) {
             break
         }
-    } 
-
-    moveCell = cell
-    while (true) {
-        moveCell = moveCell[0] + (parseInt(moveCell[1]) - 1)
-        if (collisions(moveCell)) {
-            break
-        }
-    } 
+    }
     
-    moveCell = cell
-    while (true) {
-        moveCell = cols[cols.indexOf(moveCell[0]) + 1] + moveCell[1]
+    for (let i = parseInt(cell[1]) - 1; i != 0; i--) {
+        moveCell = cell[0] + i
+        console.log(moveCell)
+        if (collisions(moveCell)) {
+            break
+        }
+    }
+    
+    for (let i = cols.indexOf(cell[0]) + 1; i != 8; i++) {
+        moveCell = cols[i] + cell[1]
         if (collisions(moveCell)) {
             break
         }
     }
 
-    moveCell = cell
-    while (true) {
-        moveCell = cols[cols.indexOf(moveCell[0]) - 1] + moveCell[1]
+    for (let i = cols.indexOf(cell[0]) - 1; i != -1; i--) {
+        moveCell = cols[i] + cell[1]
         if (collisions(moveCell)) {
             break
         }
@@ -269,7 +268,7 @@ playArea.appendChild(gameBoard())
 // }
 
 
-// OLD ROOK CODE 
+// OLDEST ROOK CODE 
 // function rook(cell) {
 //     // puts the cells that are available for move in a list
 //     let moveCell
@@ -289,6 +288,40 @@ playArea.appendChild(gameBoard())
 //     }
 //     movePiece()
 // }
+
+
+// OLD ROOK CODE
+// let moveCell = cell
+//     while (true) {
+//         moveCell = moveCell[0] + (parseInt(moveCell[1]) + 1)
+//         if (collisions(moveCell)) {
+//             break
+//         }
+//     } 
+
+//     moveCell = cell
+//     while (true) {
+//         moveCell = moveCell[0] + (parseInt(moveCell[1]) - 1)
+//         if (collisions(moveCell)) {
+//             break
+//         }
+//     } 
+    
+//     moveCell = cell
+//     while (true) {
+//         moveCell = cols[cols.indexOf(moveCell[0]) + 1] + moveCell[1]
+//         if (collisions(moveCell)) {
+//             break
+//         }
+//     }
+
+//     moveCell = cell
+//     while (true) {
+//         moveCell = cols[cols.indexOf(moveCell[0]) - 1] + moveCell[1]
+//         if (collisions(moveCell)) {
+//             break
+//         }
+//     }
 
 
 // OLD MOVE PIECE CODE
