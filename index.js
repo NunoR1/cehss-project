@@ -83,7 +83,7 @@ function gameBoard(){
                 resetBoard()
                 // identifies the piece on the space
                 whatsThatPiece(this.id)
-                // console.log(this.id)
+                console.log(this.id)
             })
             allCells.push(cell)
             row.appendChild(cell)
@@ -98,10 +98,12 @@ function whatsThatPiece(cell) {
     for (let i = 0; i < pieces[curTurn].length; i++) { // checks every piece in the piece dictionary
         // only check what the piece is if the currently sellected cell is the second object of i list in the current turn object of pieces
         if (pieces[curTurn][i][1] == cell) {
-            if (pieces[curTurn][i][0] == "rook") {
+            if (pieces[curTurn][i][0] == "pawn") {
+                bishop(cell)
+            } if (pieces[curTurn][i][0] == "rook") {
                 rook(cell)
-            } if (pieces[curTurn][i][0] == "pawn") {
-                pawn(cell)
+            } if (pieces[curTurn][i][0] == "bishop") {
+                bishop(cell)
             }
         }
     }   
@@ -129,19 +131,19 @@ function pawn(cell) {
     // initial movement
     if (cell[1] == "2") {
         moveCell = cell[0] + (parseInt(cell[1]) + 1)
-        collisions(moveCell)
+        pawnCollisions(moveCell)
         moveCell = cell[0] + (parseInt(cell[1]) + 2)
-        collisions(moveCell)
+        pawnCollisions(moveCell)
     } else if (cell[1] == "7") {
         moveCell = cell[0] + (parseInt(cell[1]) - 1)
-        collisions(moveCell)
+        pawnCollisions(moveCell)
         moveCell = cell[0] + (parseInt(cell[1]) - 2)
-        collisions(moveCell)
+        pawnCollisions(moveCell)
     }
 
     // normal movement
     moveCell = cell[0] + (parseInt(cell[1]) + 1)
-    collisions(moveCell)
+    pawnCollisions(moveCell)
 }
 
 
@@ -177,29 +179,41 @@ function rook(cell) {
     }
 }
 
+function bishop(cell) {
+    let moveCell
+    for (let i = parseInt(cell[1]); i != 9; i++) {
+        moveCell = cols.indexOf(cell[0])
+        console.log(moveCell)
+        moveCell = moveCell + (parseInt(cell[1]) + 1)
+        console.log(moveCell)
+        if (collisions(moveCell)) {
+            break
+        }
+    }
 
-function collisions(cell) {
-    for (let i = 0; i < pieces[curTurn].length; i++) { // if it runs into another piece
+}
+
+// enemy capture code is handled locally in its function
+function pawnCollisions(cell) {
+    for (let i = 0; i < pieces[curTurn].length; i++) { // if it runs into an allied piece
         if (cell == pieces[curTurn][i][1]) {
             return true
         }
     }
-    console.log(cell)
-    // for (let o = 0; o < pieces[curTurn].length; o++) {
-    //     if (((`${cell[0]}${parseInt(cell[1]) - 1}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn") || (`${cell[0]}${parseInt(cell[1]) - 2}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn"))) {
-    //         console.log(cell, `${cell[0]}${parseInt(cell[1]) - 2}`)
-    //     }
-    // }
-    // check if selected piece is a pawn because enemy capture code is handled locally in its function and only run the following code is it isn't
+    availableCells.push(cell)
+    document.getElementById(cell).style.backgroundColor = "rgb(255, 255, 0)"
+    return false
+}
+
+
+function collisions(cell) {
+    for (let i = 0; i < pieces[curTurn].length; i++) { // if it runs into an allied piece
+        if (cell == pieces[curTurn][i][1]) {
+            return true
+        }
+    }
+
     for (let o = 0; o < pieces[curTurn].length; o++) {
-        console.log(`${cell[0]}${parseInt(cell[1]) + 1}`)
-        // all possible position of pawns relative to the potential move cells (this is abysmal)
-        if (((`${cell[0]}${parseInt(cell[1]) + 1}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn") ||
-        (`${cell[0]}${parseInt(cell[1]) + 2}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn") ||
-        (`${cell[0]}${parseInt(cell[1]) - 1}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn") ||
-        (`${cell[0]}${parseInt(cell[1]) - 2}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn"))) {
-            break
-        } else {
             for (let i = 0; i < pieces[opp].length; i++) { // if it runs into an opponents piece it turns the square red
                 // if the current square (cell) is equal to the square (1) of the current piece list (i) of the opponent pieces
                 if (cell == pieces[opp][i][1]) {
@@ -208,12 +222,15 @@ function collisions(cell) {
                     return true
                 }
             }
-        }
     }
     // else push the cells
     // puts the cells that are available for move in a list
     availableCells.push(cell)
-    document.getElementById(cell).style.backgroundColor = "rgb(255, 255, 0)"
+    try {
+        document.getElementById(cell).style.backgroundColor = "rgb(255, 255, 0)"
+    } catch {
+        console.error()
+    }
     return false
 }
 
@@ -368,7 +385,7 @@ playArea.appendChild(gameBoard())
 // }
 
 
-// POTENTIAL BISHOP CODE
+// OLD POTENTIAL BISHOP CODE
 // while (true) {
 //     moveCell = cols[cols.indexOf(moveCell[0]) - 1] + moveCell[1]
 //     moveCell = moveCell[0] + (parseInt(moveCell[1]) + 1)
