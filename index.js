@@ -17,7 +17,7 @@ let pieces = {"white":
     ["rook", "d4"],
    
     // ["pawn", "a2"],
-    ["pawn", "b2"],
+    ["pawn", "b3"],
     ["pawn", "c2"],
     ["pawn", "d2"],
     ["pawn", "e2"],
@@ -42,7 +42,7 @@ let pieces = {"white":
     ["pawn", "d7"],
     ["pawn", "e7"],
     ["pawn", "f7"],
-    ["pawn", "g7"],
+    ["pawn", "g3"],
     ["pawn", "h7"]]
 }
 
@@ -74,10 +74,16 @@ function gameBoard(){
                 cell.style.backgroundColor = "rgb(255, 255, 255)"
             }
             cell.addEventListener("click", function() {
-                // identifies the piece on the space
+                // movement code
+                if (availableCells.indexOf(cell.id) >= 0) {
+                    console.log("hello")
+                } else if (threatCells.indexOf(cell.id) >= 0) {
+                    console.log("bye")
+                }
                 resetBoard()
+                // identifies the piece on the space
                 whatsThatPiece(this.id)
-                console.log(this.id)
+                // console.log(this.id)
             })
             allCells.push(cell)
             row.appendChild(cell)
@@ -103,11 +109,23 @@ function whatsThatPiece(cell) {
 
 
 
-
-
 function pawn(cell) {
+    // defines possible eatable pieces for pawns
+    let leftThreat = `${cols[cols.indexOf(cell[0]) - 1]}${parseInt(cell[1]) + 1}`
+    let rightThreat = `${cols[cols.indexOf(cell[0]) + 1]}${parseInt(cell[1]) + 1}`
     let moveCell
+
+    for (let i = 0; i < pieces[opp].length; i++) {
     // eat enemy piece first if
+        if (leftThreat == pieces[opp][i][1]) {
+            document.getElementById(leftThreat).style.backgroundColor = "rgb(255, 0, 0)"
+            threatCells.push(leftThreat)
+        } if (rightThreat == pieces[opp][i][1]) {
+            document.getElementById(rightThreat).style.backgroundColor = "rgb(255, 0, 0)"
+            threatCells.push(rightThreat)
+        } 
+    }
+
     if (cell[1] == "2") {
         moveCell = cell[0] + (parseInt(cell[1]) + 1)
         collisions(moveCell)
@@ -165,21 +183,35 @@ function collisions(cell) {
             return true
         }
     }
-    for (let i = 0; i < pieces[opp].length; i++) { // if it runs into an opponents piece it turns the square red
-        if (cell == pieces[opp][i][1]) {
-            document.getElementById(cell).style.backgroundColor = "rgb(255, 0, 0)"
-            threatCells.push(cell)
-            return true
+
+    // for (let o = 0; o < pieces[curTurn].length; o++) {
+    //     if (((`${cell[0]}${parseInt(cell[1]) - 1}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn") || (`${cell[0]}${parseInt(cell[1]) - 2}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn"))) {
+    //         console.log(cell, `${cell[0]}${parseInt(cell[1]) - 2}`)
+    //     }
+    // }
+    // check if selected piece is a pawn because enemy capture code is handled locally in its function and only run the following code is it isn't
+    for (let o = 0; o < pieces[curTurn].length; o++) {
+        // all possible position of pawns relative to the potential move cells (this is abysmal)
+        if (((`${cell[0]}${parseInt(cell[1]) + 1}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn") ||
+        (`${cell[0]}${parseInt(cell[1]) + 2}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn") ||
+        (`${cell[0]}${parseInt(cell[1]) - 1}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn") ||
+        (`${cell[0]}${parseInt(cell[1]) - 2}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn"))) {
+            break
+        } else {
+            for (let i = 0; i < pieces[opp].length; i++) { // if it runs into an opponents piece it turns the square red
+                // if the current square (cell) is equal to the square (1) of the current piece list (i) of the opponent pieces
+                if (cell == pieces[opp][i][1]) {
+                    document.getElementById(cell).style.backgroundColor = "rgb(255, 0, 0)"
+                    threatCells.push(cell)
+                    return true
+                }
+            }
         }
     }
     // else push the cells
     // puts the cells that are available for move in a list
     availableCells.push(cell)
-    try {
-        document.getElementById(cell).style.backgroundColor = "rgb(255, 255, 0)"
-    } catch {
-        console.error()
-    }
+    document.getElementById(cell).style.backgroundColor = "rgb(255, 255, 0)"
     return false
 }
 
@@ -187,6 +219,7 @@ function collisions(cell) {
 // resets the chessboard pattern and the available cells
 function resetBoard() {
    availableCells = []
+   threatCells = []
    for (let i = 8; i > 0; i--) {
        for (let a = 0; a < 8; a++) {
            let cell = document.getElementById(`${cols[a]}${i}`)
