@@ -126,6 +126,7 @@ function pawn(cell) {
         } 
     }
 
+    // initial movement
     if (cell[1] == "2") {
         moveCell = cell[0] + (parseInt(cell[1]) + 1)
         collisions(moveCell)
@@ -183,7 +184,7 @@ function collisions(cell) {
             return true
         }
     }
-
+    console.log(cell)
     // for (let o = 0; o < pieces[curTurn].length; o++) {
     //     if (((`${cell[0]}${parseInt(cell[1]) - 1}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn") || (`${cell[0]}${parseInt(cell[1]) - 2}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn"))) {
     //         console.log(cell, `${cell[0]}${parseInt(cell[1]) - 2}`)
@@ -191,6 +192,7 @@ function collisions(cell) {
     // }
     // check if selected piece is a pawn because enemy capture code is handled locally in its function and only run the following code is it isn't
     for (let o = 0; o < pieces[curTurn].length; o++) {
+        console.log(`${cell[0]}${parseInt(cell[1]) + 1}`)
         // all possible position of pawns relative to the potential move cells (this is abysmal)
         if (((`${cell[0]}${parseInt(cell[1]) + 1}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn") ||
         (`${cell[0]}${parseInt(cell[1]) + 2}` == pieces[curTurn][o][1] && pieces[curTurn][o][0] == "pawn") ||
