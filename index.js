@@ -7,7 +7,7 @@ let curTurn = "white"
 let opp = "black"
 let pieces = {"white":
     // white pieces
-    [["rook", "a1"],
+    [["bishop", "a1"],
     ["knight", "b1"],
     ["bishop", "c1"],
     ["queen", "d1"],
@@ -181,16 +181,16 @@ function rook(cell) {
 
 function bishop(cell) {
     let moveCell
-    for (let i = parseInt(cell[1]); i != 9; i++) {
-        moveCell = cols.indexOf(cell[0])
+    let o
+    for (let i = parseInt(cell[1]) + 1; (i != 8) || (o <= 7); i++) {
+        o = cols.indexOf(cell[0]) + (i)
+         
+        moveCell = cols[o] + i
         console.log(moveCell)
-        moveCell = moveCell + (parseInt(cell[1]) + 1)
-        console.log(moveCell)
-        if (collisions(moveCell)) {
-            break
-        }
+        // if (collisions(moveCell)) {
+        //     break
+        // }
     }
-
 }
 
 // enemy capture code is handled locally in its function
@@ -226,11 +226,7 @@ function collisions(cell) {
     // else push the cells
     // puts the cells that are available for move in a list
     availableCells.push(cell)
-    try {
-        document.getElementById(cell).style.backgroundColor = "rgb(255, 255, 0)"
-    } catch {
-        console.error()
-    }
+    document.getElementById(cell).style.backgroundColor = "rgb(255, 255, 0)"
     return false
 }
 
