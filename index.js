@@ -1,13 +1,14 @@
 const playArea = document.getElementById("area");
 let cols = "abcdefgh"
 let allCells = []
+let currentCell
 let availableCells = []
 let threatCells = []
 let curTurn = "white"
 let opp = "black"
 let pieces = {"white":
     // white pieces
-    [["bishop", "a1"],
+    [["rook", "a1"],
     ["knight", "b1"],
     ["bishop", "c1"],
     ["queen", "d1"],
@@ -53,6 +54,7 @@ function gameBoard(){
     // for indetifying columns
     // define the play area
     let board = document.createElement("table")
+    board.id = "theBoard"
     // formats the table
     board.style.borderSpacing = "0px"
     board.style.border = "15px solid black"
@@ -73,19 +75,19 @@ function gameBoard(){
             } else {
                 cell.style.backgroundColor = "rgb(255, 255, 255)"
             }
+            allCells.push(cell.id)
             cell.addEventListener("click", function() {
                 // movement code
                 if (availableCells.indexOf(cell.id) >= 0) {
-                    console.log("hello")
+                    move(currentCell, this.id)
                 } else if (threatCells.indexOf(cell.id) >= 0) {
                     console.log("bye")
                 }
                 resetBoard()
-                // identifies the piece on the space
                 whatsThatPiece(this.id)
+                // identifies the piece on the space
                 console.log(this.id)
             })
-            allCells.push(cell)
             row.appendChild(cell)
         }
         board.appendChild(row)
@@ -95,20 +97,20 @@ function gameBoard(){
 
 
 function whatsThatPiece(cell) {
+    currentCell = cell
     for (let i = 0; i < pieces[curTurn].length; i++) { // checks every piece in the piece dictionary
         // only check what the piece is if the currently sellected cell is the second object of i list in the current turn object of pieces
         if (pieces[curTurn][i][1] == cell) {
             if (pieces[curTurn][i][0] == "pawn") {
-                bishop(cell)
+                pawn(cell)
             } if (pieces[curTurn][i][0] == "rook") {
-                rook(cell)
+                bishop(cell)
             } if (pieces[curTurn][i][0] == "bishop") {
                 bishop(cell)
             }
         }
     }   
 }
-
 
 
 function pawn(cell) {
@@ -131,19 +133,34 @@ function pawn(cell) {
     // initial movement
     if (cell[1] == "2") {
         moveCell = cell[0] + (parseInt(cell[1]) + 1)
-        pawnCollisions(moveCell)
+        if (pawnCollisions(moveCell)) {
+            return
+        }
         moveCell = cell[0] + (parseInt(cell[1]) + 2)
-        pawnCollisions(moveCell)
+        if (pawnCollisions(moveCell)) {
+            return
+        }
     } else if (cell[1] == "7") {
         moveCell = cell[0] + (parseInt(cell[1]) - 1)
-        pawnCollisions(moveCell)
+        if (pawnCollisions(moveCell)) {
+            return
+        }
         moveCell = cell[0] + (parseInt(cell[1]) - 2)
-        pawnCollisions(moveCell)
+        if (pawnCollisions(moveCell)) {
+            return
+        }
     }
 
     // normal movement
-    moveCell = cell[0] + (parseInt(cell[1]) + 1)
-    pawnCollisions(moveCell)
+    if (curTurn == "white") {
+        moveCell = cell[0] + (parseInt(cell[1]) + 1)
+    } if (curTurn == "black") {
+        moveCell = cell[0] + (parseInt(cell[1]) - 1)
+    }
+    
+    if (pawnCollisions(moveCell)) {
+        return
+    }
 }
 
 
@@ -181,15 +198,16 @@ function rook(cell) {
 
 function bishop(cell) {
     let moveCell
-    let o
-    for (let i = parseInt(cell[1]) + 1; (i != 8) || (o <= 7); i++) {
-        o = cols.indexOf(cell[0]) + (i)
-         
+    let o = cols.indexOf(cell[0])
+    for (let i = parseInt(cell[1]) + 1; (i <= 8) || (o <= 7); i++) {
+        
+        console.log(i)
+        console.log(o)
         moveCell = cols[o] + i
         console.log(moveCell)
-        // if (collisions(moveCell)) {
-        //     break
-        // }
+        if (!collisions(moveCell)) {
+            break
+        }
     }
 }
 
@@ -200,6 +218,13 @@ function pawnCollisions(cell) {
             return true
         }
     }
+
+    for (let i = 0; i < pieces[opp].length; i++) { // if it runs into an allied piece
+        if (cell == pieces[opp][i][1]) {
+            return true
+        }
+    }
+    
     availableCells.push(cell)
     document.getElementById(cell).style.backgroundColor = "rgb(255, 255, 0)"
     return false
@@ -231,10 +256,33 @@ function collisions(cell) {
 }
 
 
+function move(fromCell, toCell) {
+    for (let i = 0; i < pieces[curTurn].length; i++) {
+        if (pieces[curTurn][i][1] == fromCell){
+            pieces[curTurn][i][1] = toCell
+        }
+    }
+    generatePieces(toCell)
+    document.getElementById(fromCell).innerHTML = ""
+    
+    switch (curTurn){
+        case "white":
+            curTurn = "black"
+            opp = "white"
+            break
+        case "black":
+            curTurn = "white"
+            opp = "black"
+            break
+        }
+    console.log(curTurn)
+}
+
 // resets the chessboard pattern and the available cells
 function resetBoard() {
    availableCells = []
    threatCells = []
+   currentCell = ""
    for (let i = 8; i > 0; i--) {
        for (let a = 0; a < 8; a++) {
            let cell = document.getElementById(`${cols[a]}${i}`)
@@ -247,8 +295,80 @@ function resetBoard() {
    }
 }
 
+
+function generatePieces(cell) {
+    let curCell = document.getElementById(cell)
+    let whitePieces = "♙♖♗♕♘♔"
+    let blackPieces = "♟♜♝♛♞♚"
+
+    for (let i = 0; i < pieces["white"].length; i++) {
+        if (pieces["white"][i][1] == cell) {
+            if (pieces["white"][i][0] == "pawn") {
+                curCell.innerHTML = whitePieces[0]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            } if (pieces["white"][i][0] == "rook") {
+                curCell.innerHTML = whitePieces[1]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            } if (pieces["white"][i][0] == "bishop") {
+                curCell.innerHTML = whitePieces[2]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            } if (pieces["white"][i][0] == "queen") {
+                curCell.innerHTML = whitePieces[3]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            } if (pieces["white"][i][0] == "knight") {
+                curCell.innerHTML = whitePieces[4]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            } if (pieces["white"][i][0] == "king") {
+                curCell.innerHTML = whitePieces[5]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            }
+        }
+    }
+
+    for (let i = 0; i < pieces["black"].length; i++) {
+        if (pieces["black"][i][1] == cell) {
+            if (pieces["black"][i][0] == "pawn") {
+                curCell.innerHTML = blackPieces[0]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            } if (pieces["black"][i][0] == "rook") {
+                curCell. innerHTML = blackPieces[1]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            } if (pieces["black"][i][0] == "bishop") {
+                curCell.innerHTML = blackPieces[2]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            } if (pieces["black"][i][0] == "queen") {
+                curCell.innerHTML = blackPieces[3]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            } if (pieces["black"][i][0] == "knight") {
+                curCell.innerHTML = blackPieces[4]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            } if (pieces["black"][i][0] == "king") {
+                curCell.innerHTML = blackPieces[5]
+                curCell.style.fontSize = "230%"
+                curCell.style.textAlign = "center"
+            }
+        }
+    }
+}
+
+
 playArea.appendChild(gameBoard())
 
+
+for (let i = 0; i < allCells.length; i++) {
+    generatePieces(allCells[i])
+}
 
 // TEST BUTTON
 // let testButton = document.createElement("button")
