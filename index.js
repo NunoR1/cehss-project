@@ -6,7 +6,8 @@ let availableCells = []
 let threatCells = []
 let curTurn = "white"
 let opp = "black"
-let pieces = {"white":
+let pieces = {
+    "white":
     // white pieces
     [["rook", "a1"],
     ["knight", "b1"],
@@ -15,10 +16,10 @@ let pieces = {"white":
     ["king", "e1"],
     ["bishop", "f1"],
     ["knight", "g1"],
-    ["rook", "d4"],
+    ["rook", "h1"],
    
-    // ["pawn", "a2"],
-    ["pawn", "b3"],
+    ["pawn", "a2"],
+    ["pawn", "b2"],
     ["pawn", "c2"],
     ["pawn", "d2"],
     ["pawn", "e2"],
@@ -43,7 +44,7 @@ let pieces = {"white":
     ["pawn", "d7"],
     ["pawn", "e7"],
     ["pawn", "f7"],
-    ["pawn", "g3"],
+    ["pawn", "g7"],
     ["pawn", "h7"]]
 }
 
@@ -81,7 +82,7 @@ function gameBoard(){
                 if (availableCells.indexOf(cell.id) >= 0) {
                     move(currentCell, this.id)
                 } else if (threatCells.indexOf(cell.id) >= 0) {
-                    console.log("bye")
+                    kill(this.id)
                 }
                 resetBoard()
                 whatsThatPiece(this.id)
@@ -104,9 +105,15 @@ function whatsThatPiece(cell) {
             if (pieces[curTurn][i][0] == "pawn") {
                 pawn(cell)
             } if (pieces[curTurn][i][0] == "rook") {
-                bishop(cell)
+                rook(cell)
             } if (pieces[curTurn][i][0] == "bishop") {
                 bishop(cell)
+            } if (pieces[curTurn][i][0] == "queen") {
+                queen(cell)
+            } if (pieces[curTurn][i][0] == "knight") {
+                knight(cell)
+            } if (pieces[curTurn][i][0] == "king") {
+                king(cell)
             }
         }
     }   
@@ -115,9 +122,17 @@ function whatsThatPiece(cell) {
 
 function pawn(cell) {
     // defines possible eatable pieces for pawns
-    let leftThreat = `${cols[cols.indexOf(cell[0]) - 1]}${parseInt(cell[1]) + 1}`
-    let rightThreat = `${cols[cols.indexOf(cell[0]) + 1]}${parseInt(cell[1]) + 1}`
+    let leftThreat
+    let rightThreat
     let moveCell
+
+    if (curTurn == "white") {
+        leftThreat = `${cols[cols.indexOf(cell[0]) - 1]}${parseInt(cell[1]) + 1}`
+        rightThreat = `${cols[cols.indexOf(cell[0]) + 1]}${parseInt(cell[1]) + 1}`
+    } if (curTurn == "black") {
+        leftThreat = `${cols[cols.indexOf(cell[0]) - 1]}${parseInt(cell[1]) - 1}`
+        rightThreat = `${cols[cols.indexOf(cell[0]) + 1]}${parseInt(cell[1]) - 1}`
+    }
 
     for (let i = 0; i < pieces[opp].length; i++) {
     // eat enemy piece first if
@@ -131,7 +146,7 @@ function pawn(cell) {
     }
 
     // initial movement
-    if (cell[1] == "2") {
+    if (cell[1] == "2" && curTurn == "white") {
         moveCell = cell[0] + (parseInt(cell[1]) + 1)
         if (pawnCollisions(moveCell)) {
             return
@@ -140,7 +155,7 @@ function pawn(cell) {
         if (pawnCollisions(moveCell)) {
             return
         }
-    } else if (cell[1] == "7") {
+    } else if (cell[1] == "7" && curTurn == "black") {
         moveCell = cell[0] + (parseInt(cell[1]) - 1)
         if (pawnCollisions(moveCell)) {
             return
@@ -198,18 +213,104 @@ function rook(cell) {
 
 function bishop(cell) {
     let moveCell
-    let o = cols.indexOf(cell[0])
-    for (let i = parseInt(cell[1]) + 1; (i <= 8) || (o <= 7); i++) {
-        
-        console.log(i)
-        console.log(o)
+    let o = cols.indexOf(cell[0]) + 1 // when going left
+    for (let i = parseInt(cell[1]) + 1; o < 8 || i < 9; i++) {  // when going up
         moveCell = cols[o] + i
-        console.log(moveCell)
-        if (!collisions(moveCell)) {
+        o++
+        if (collisions(moveCell)) {
             break
         }
     }
+    
+    o = cols.indexOf(cell[0]) + 1 // when going left
+    for (let i = parseInt(cell[1]) - 1; o < 8 || i > -1; i--) {  // when going down
+        moveCell = cols[o] + i
+        o++
+        if (collisions(moveCell)) {
+            break
+        }
+    }
+
+    o = cols.indexOf(cell[0]) - 1 // when going right
+    for (let i = parseInt(cell[1]) - 1; o > 0 || i > -1; i--) { // when going down
+        moveCell = cols[o] + i
+        o--
+        if (collisions(moveCell)) {
+            break
+        }
+    }
+    
+    o = cols.indexOf(cell[0]) - 1 // when going right
+    for (let i = parseInt(cell[1]) + 1; o > 0 || i < 9; i++) { // when going up
+        moveCell = cols[o] + i
+        o--
+        if (collisions(moveCell)) {
+            break
+        }
+    }
+
 }
+
+// easy
+function queen(cell) {
+    rook(cell)
+    bishop(cell)
+}
+
+
+function knight(cell) {
+    let moveCell
+    // man i wish there was an easier way to do this
+    moveCell = cols[cols.indexOf(cell[0]) + 2] + (parseInt(cell[1]) + 1)
+    console.log(moveCell)
+    collisions(moveCell)
+
+    moveCell = cols[cols.indexOf(cell[0]) - 2] + (parseInt(cell[1]) + 1)
+    console.log(moveCell)
+    collisions(moveCell)
+
+    moveCell = cols[cols.indexOf(cell[0]) + 2] + (parseInt(cell[1]) - 1)
+    console.log(moveCell)
+    collisions(moveCell)
+
+    moveCell = cols[cols.indexOf(cell[0]) - 2] + (parseInt(cell[1]) - 1)
+    console.log(moveCell)
+    collisions(moveCell)
+
+    moveCell = cols[cols.indexOf(cell[0]) + 1] + (parseInt(cell[1]) + 2)
+    console.log(moveCell)
+    collisions(moveCell)
+
+    moveCell = cols[cols.indexOf(cell[0]) - 1] + (parseInt(cell[1]) + 2)
+    console.log(moveCell)
+    collisions(moveCell)
+
+    moveCell = cols[cols.indexOf(cell[0]) + 1] + (parseInt(cell[1]) - 2)
+    console.log(moveCell)
+    collisions(moveCell)
+
+    moveCell = cols[cols.indexOf(cell[0]) - 1] + (parseInt(cell[1]) - 2)
+    console.log(moveCell)
+    collisions(moveCell)
+}
+
+
+function king(cell) {
+    let moveCell
+    // man i wish there was an easier way to do this
+    moveCell = cols[cols.indexOf(cell[0]) - 1] + cell[1]
+    collisions(moveCell)
+
+    moveCell = cols[cols.indexOf(cell[0]) + 1] + cell[1]
+    collisions(moveCell)
+    
+    moveCell = cols[cols.indexOf(cell[0]) - 1] + (parseInt(cell[1]) - 1)
+    collisions(moveCell)
+
+    moveCell = cols[cols.indexOf(cell[0]) - 1] + (parseInt(cell[1]) - 1)
+    collisions(moveCell)
+}
+
 
 // enemy capture code is handled locally in its function
 function pawnCollisions(cell) {
@@ -251,9 +352,23 @@ function collisions(cell) {
     // else push the cells
     // puts the cells that are available for move in a list
     availableCells.push(cell)
-    document.getElementById(cell).style.backgroundColor = "rgb(255, 255, 0)"
+    try {
+        document.getElementById(cell).style.backgroundColor = "rgb(255, 255, 0)"
+    } catch {
+        console.error()
+    }
     return false
 }
+
+
+function kill(cell) {
+    for (let i = 0; i < pieces[opp].length; i++) {
+        if (pieces[opp][i][1] == cell) {
+            pieces[opp][i] = ""
+        }
+    }
+    move(currentCell, cell)
+} 
 
 
 function move(fromCell, toCell) {
@@ -364,7 +479,6 @@ function generatePieces(cell) {
 
 
 playArea.appendChild(gameBoard())
-
 
 for (let i = 0; i < allCells.length; i++) {
     generatePieces(allCells[i])
