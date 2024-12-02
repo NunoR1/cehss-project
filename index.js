@@ -1,9 +1,24 @@
 const playArea = document.getElementById("area");
+// to call ids
 let cols = "abcdefgh"
+// contains all 64 spaces on the board, used when generating the piece images
 let allCells = []
+// used to store the last clicked viable space
 let currentCell
 let availableCells = []
 let threatCells = []
+// possible king moves
+let kingPoss = {
+    "white":[],
+    "black":[]
+}
+let kingThreat = {
+    "white":[],
+    "black":[]
+}
+// checks if the kings are being threatened
+let whiteInCheck = false
+let blackInCheck = false
 let curTurn = "white"
 let opp = "black"
 let pieces = {
@@ -57,7 +72,7 @@ function gameBoard(){
     let board = document.createElement("table")
     board.id = "theBoard"
     // formats the table
-    board.style.borderSpacing = "0px"
+    board.style.borderSpacing = "1px"
     board.style.border = "15px solid black"
     // define the spaces
     for (let i = 8; i > 0; i--) {
@@ -76,7 +91,7 @@ function gameBoard(){
             } else {
                 cell.style.backgroundColor = "rgb(255, 255, 255)"
             }
-            allCells.push(cell.id)
+            allCells.push(cell.id) // refer to the comment when the variable is initialized
             cell.addEventListener("click", function() {
                 // movement code
                 if (availableCells.indexOf(cell.id) >= 0) {
@@ -87,18 +102,20 @@ function gameBoard(){
                 resetBoard()
                 whatsThatPiece(this.id)
                 // identifies the piece on the space
-                console.log(this.id)
+                // console.log(this.id)
             })
             row.appendChild(cell)
         }
         board.appendChild(row)
     }
+    kingBullshit()
     return board;
 };
 
 
 function whatsThatPiece(cell) {
     currentCell = cell
+    kingBullshit()
     for (let i = 0; i < pieces[curTurn].length; i++) { // checks every piece in the piece dictionary
         // only check what the piece is if the currently sellected cell is the second object of i list in the current turn object of pieces
         if (pieces[curTurn][i][1] == cell) {
@@ -113,7 +130,7 @@ function whatsThatPiece(cell) {
             } if (pieces[curTurn][i][0] == "knight") {
                 knight(cell)
             } if (pieces[curTurn][i][0] == "king") {
-                king(cell)
+                king()
             }
         }
     }   
@@ -144,7 +161,8 @@ function pawn(cell) {
             threatCells.push(rightThreat)
         } 
     }
-
+    
+    
     // initial movement
     if (cell[1] == "2" && curTurn == "white") {
         moveCell = cell[0] + (parseInt(cell[1]) + 1)
@@ -165,7 +183,7 @@ function pawn(cell) {
             return
         }
     }
-
+    
     // normal movement
     if (curTurn == "white") {
         moveCell = cell[0] + (parseInt(cell[1]) + 1)
@@ -175,6 +193,20 @@ function pawn(cell) {
     
     if (pawnCollisions(moveCell)) {
         return
+    }
+
+    // i forgor WIP
+    for (let i = 0; i < pieces[curTurn].length; i++) {
+        if (cell[1] == "8" && curTurn == "white") {
+            if (pieces[curTurn][i][1] == cell) {
+                pieces[curTurn][i][0] = "queen"
+            }
+        
+        } else if (cell[1] == "1" && curTurn == "black") {
+            if (pieces[curTurn][i][1] == cell) {
+                pieces[curTurn][i][0] = "queen"
+            }   
+        }
     }
 }
 
@@ -190,7 +222,6 @@ function rook(cell) {
     
     for (let i = parseInt(cell[1]) - 1; i != 0; i--) {
         moveCell = cell[0] + i
-        console.log(moveCell)
         if (collisions(moveCell)) {
             break
         }
@@ -210,6 +241,7 @@ function rook(cell) {
         }
     }
 }
+
 
 function bishop(cell) {
     let moveCell
@@ -248,7 +280,6 @@ function bishop(cell) {
             break
         }
     }
-
 }
 
 // easy
@@ -262,55 +293,70 @@ function knight(cell) {
     let moveCell
     // man i wish there was an easier way to do this
     moveCell = cols[cols.indexOf(cell[0]) + 2] + (parseInt(cell[1]) + 1)
-    console.log(moveCell)
     collisions(moveCell)
 
     moveCell = cols[cols.indexOf(cell[0]) - 2] + (parseInt(cell[1]) + 1)
-    console.log(moveCell)
     collisions(moveCell)
 
     moveCell = cols[cols.indexOf(cell[0]) + 2] + (parseInt(cell[1]) - 1)
-    console.log(moveCell)
     collisions(moveCell)
 
     moveCell = cols[cols.indexOf(cell[0]) - 2] + (parseInt(cell[1]) - 1)
-    console.log(moveCell)
     collisions(moveCell)
 
     moveCell = cols[cols.indexOf(cell[0]) + 1] + (parseInt(cell[1]) + 2)
-    console.log(moveCell)
     collisions(moveCell)
 
     moveCell = cols[cols.indexOf(cell[0]) - 1] + (parseInt(cell[1]) + 2)
-    console.log(moveCell)
     collisions(moveCell)
 
     moveCell = cols[cols.indexOf(cell[0]) + 1] + (parseInt(cell[1]) - 2)
-    console.log(moveCell)
     collisions(moveCell)
 
     moveCell = cols[cols.indexOf(cell[0]) - 1] + (parseInt(cell[1]) - 2)
-    console.log(moveCell)
     collisions(moveCell)
 }
 
 
-function king(cell) {
+function king() {
+    for (let i = 0; i < kingPoss[curTurn].length; i++) {
+        collisions(kingPoss[curTurn][i])
+    }
+}
+
+function kingBullshit() {
     let moveCell
+    kingPoss[curTurn] = []
     // man i wish there was an easier way to do this
-    moveCell = cols[cols.indexOf(cell[0]) - 1] + cell[1]
-    collisions(moveCell)
+    for (let i = 0; i < pieces[curTurn].length; i++) {
+        if (pieces[curTurn][i][0] == "king") {
+            moveCell = cols[cols.indexOf(pieces[curTurn][i][1][0]) - 1] + pieces[curTurn][i][1][1]
+            kingPoss[curTurn].push(moveCell)
+            
+            moveCell = cols[cols.indexOf(pieces[curTurn][i][1][0]) + 1] + pieces[curTurn][i][1][1]
+            kingPoss[curTurn].push(moveCell)
 
-    moveCell = cols[cols.indexOf(cell[0]) + 1] + cell[1]
-    collisions(moveCell)
-    
-    moveCell = cols[cols.indexOf(cell[0]) - 1] + (parseInt(cell[1]) - 1)
-    collisions(moveCell)
+            moveCell = pieces[curTurn][i][1][0] + (parseInt(pieces[curTurn][i][1][1]) - 1)
+            kingPoss[curTurn].push(moveCell)
 
-    moveCell = cols[cols.indexOf(cell[0]) - 1] + (parseInt(cell[1]) - 1)
-    collisions(moveCell)
+            moveCell = pieces[curTurn][i][1][0] + (parseInt(pieces[curTurn][i][1][1]) + 1)
+            kingPoss[curTurn].push(moveCell)
+            
+            moveCell = cols[cols.indexOf(pieces[curTurn][i][1][0]) - 1] + (parseInt(pieces[curTurn][i][1][1]) + 1)
+            kingPoss[curTurn].push(moveCell)
+            
+            moveCell = cols[cols.indexOf(pieces[curTurn][i][1][0]) + 1] + (parseInt(pieces[curTurn][i][1][1]) + 1)
+            kingPoss[curTurn].push(moveCell)
+
+            moveCell = cols[cols.indexOf(pieces[curTurn][i][1][0]) - 1] + (parseInt(pieces[curTurn][i][1][1]) - 1)
+            kingPoss[curTurn].push(moveCell)
+            
+            moveCell = cols[cols.indexOf(pieces[curTurn][i][1][0]) + 1] + (parseInt(pieces[curTurn][i][1][1]) - 1)
+            kingPoss[curTurn].push(moveCell)
+        }
+    }
+    console.log(kingPoss)
 }
-
 
 // enemy capture code is handled locally in its function
 function pawnCollisions(cell) {
@@ -341,7 +387,6 @@ function collisions(cell) {
 
     for (let o = 0; o < pieces[curTurn].length; o++) {
             for (let i = 0; i < pieces[opp].length; i++) { // if it runs into an opponents piece it turns the square red
-                // if the current square (cell) is equal to the square (1) of the current piece list (i) of the opponent pieces
                 if (cell == pieces[opp][i][1]) {
                     document.getElementById(cell).style.backgroundColor = "rgb(255, 0, 0)"
                     threatCells.push(cell)
@@ -352,6 +397,7 @@ function collisions(cell) {
     // else push the cells
     // puts the cells that are available for move in a list
     availableCells.push(cell)
+    // we ball
     try {
         document.getElementById(cell).style.backgroundColor = "rgb(255, 255, 0)"
     } catch {
@@ -377,6 +423,8 @@ function move(fromCell, toCell) {
             pieces[curTurn][i][1] = toCell
         }
     }
+    
+    
     generatePieces(toCell)
     document.getElementById(fromCell).innerHTML = ""
     
@@ -390,7 +438,6 @@ function move(fromCell, toCell) {
             opp = "black"
             break
         }
-    console.log(curTurn)
 }
 
 // resets the chessboard pattern and the available cells
@@ -412,6 +459,7 @@ function resetBoard() {
 
 
 function generatePieces(cell) {
+    // man i wish there was an easier way to do this
     let curCell = document.getElementById(cell)
     let whitePieces = "♙♖♗♕♘♔"
     let blackPieces = "♟♜♝♛♞♚"
@@ -478,11 +526,15 @@ function generatePieces(cell) {
 }
 
 
-playArea.appendChild(gameBoard())
+function main() {
+    playArea.appendChild(gameBoard())
 
-for (let i = 0; i < allCells.length; i++) {
-    generatePieces(allCells[i])
+    for (let i = 0; i < allCells.length; i++) {
+        generatePieces(allCells[i])
+    }
 }
+
+main()
 
 // TEST BUTTON
 // let testButton = document.createElement("button")
@@ -622,4 +674,33 @@ for (let i = 0; i < allCells.length; i++) {
 //     if (collisions(moveCell)) {
 //         break
 //     }
+// }
+
+// OLD KING CODE (BEAUTIFUL IN RETROSPECT)
+// function king(cell) {
+//     let moveCell
+//     // man i wish there was an easier way to do this
+//     moveCell = cols[cols.indexOf(cell[0]) - 1] + cell[1]
+//     collisions(moveCell)
+    
+//     moveCell = cols[cols.indexOf(cell[0]) + 1] + cell[1]
+//     collisions(moveCell)
+
+//     moveCell = cell[0] + (parseInt(cell[1]) - 1)
+//     collisions(moveCell)
+
+//     moveCell = cell[0] + (parseInt(cell[1]) + 1)
+//     collisions(moveCell)
+    
+//     moveCell = cols[cols.indexOf(cell[0]) - 1] + (parseInt(cell[1]) + 1)
+//     collisions(moveCell)
+    
+//     moveCell = cols[cols.indexOf(cell[0]) + 1] + (parseInt(cell[1]) + 1)
+//     collisions(moveCell)
+
+//     moveCell = cols[cols.indexOf(cell[0]) - 1] + (parseInt(cell[1]) - 1)
+//     collisions(moveCell)
+    
+//     moveCell = cols[cols.indexOf(cell[0]) + 1] + (parseInt(cell[1]) - 1)
+//     collisions(moveCell)
 // }
