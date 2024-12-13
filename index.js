@@ -5,65 +5,82 @@ let cols = "abcdefgh"
 let allCells = []
 // used to store the last clicked viable space
 let currentCell
-let availableCells = []
-let threatCells = []
+let availableCells
+let threatCells
 // possible king moves
-let kingPoss = {
-    "white":[],
-    "black":[]
-}
-let kingThreat = {
-    "white":[],
-    "black":[]
-}
+let kingPoss
+let kingThreat
 // checks if the kings are being threatened
-let whiteInCheck = false
-let blackInCheck = false
-let curTurn = "white"
-let opp = "black"
-let pieces = {
-    "white":
-    // white pieces
-    [["rook", "a1"],
-    ["knight", "b1"],
-    ["bishop", "c1"],
-    ["queen", "d1"],
-    ["king", "e1"],
-    ["bishop", "f1"],
-    ["knight", "g1"],
-    ["rook", "h1"],
-   
-    ["pawn", "a2"],
-    ["pawn", "b2"],
-    ["pawn", "c2"],
-    ["pawn", "d2"],
-    ["pawn", "e2"],
-    ["pawn", "f2"],
-    ["pawn", "g2"],
-    ["pawn", "h2"]],
-   
-    "black":
-    // black pieces
-    [["rook", "a8"],
-    ["knight", "b8"],
-    ["bishop", "c8"],
-    ["queen", "d8"],
-    ["king", "e8"],
-    ["bishop", "f8"],
-    ["knight", "g8"],
-    ["rook", "h8"],
-   
-    ["pawn", "a7"],
-    ["pawn", "b7"],
-    ["pawn", "c7"],
-    ["pawn", "d7"],
-    ["pawn", "e7"],
-    ["pawn", "f7"],
-    ["pawn", "g7"],
-    ["pawn", "h7"]]
+let whiteInCheck
+let blackInCheck
+let curTurn
+let opp
+let pieces
+
+
+function main() {
+    availableCells = []
+    threatCells = []
+    kingPoss = {
+        "white":[],
+        "black":[]
+    }
+    kingThreat = {
+        "white":[],
+        "black":[]
+    }
+    whiteInCheck = false
+    blackInCheck = false
+    curTurn = "white"
+    opp = "black"
+    pieces = {
+        "white":
+        // white pieces
+        [["rook", "a1"],
+        ["knight", "b1"],
+        ["bishop", "c1"],
+        ["queen", "d1"],
+        ["king", "e1"],
+        ["bishop", "f1"],
+        ["knight", "g1"],
+        ["rook", "h1"],
+       
+        ["pawn", "a2"],
+        ["pawn", "b2"],
+        ["pawn", "c2"],
+        ["pawn", "d2"],
+        ["pawn", "e2"],
+        ["pawn", "f2"],
+        ["pawn", "g2"],
+        ["pawn", "h2"]],
+       
+        "black":
+        // black pieces
+        [["rook", "a8"],
+        ["knight", "b8"],
+        ["bishop", "c8"],
+        ["queen", "d8"],
+        ["king", "e8"],
+        ["bishop", "f8"],
+        ["knight", "g8"],
+        ["rook", "h8"],
+       
+        ["pawn", "a7"],
+        ["pawn", "b7"],
+        ["pawn", "c7"],
+        ["pawn", "d7"],
+        ["pawn", "e7"],
+        ["pawn", "f7"],
+        ["pawn", "g7"],
+        ["pawn", "h7"]]
+    }
+
+    playArea.appendChild(gameBoard())
+
+    for (let i = 0; i < allCells.length; i++) {
+        generatePieces(allCells[i])
+    }
 }
-
-
 
 
 function gameBoard(){
@@ -97,25 +114,23 @@ function gameBoard(){
                 if (availableCells.indexOf(cell.id) >= 0) {
                     move(currentCell, this.id)
                 } else if (threatCells.indexOf(cell.id) >= 0) {
+                    endGame()
                     kill(this.id)
                 }
                 resetBoard()
-                whatsThatPiece(this.id)
                 // identifies the piece on the space
-                // console.log(this.id)
+                whatsThatPiece(this.id)
             })
             row.appendChild(cell)
         }
         board.appendChild(row)
     }
-    kingBullshit()
     return board;
 };
 
 
 function whatsThatPiece(cell) {
     currentCell = cell
-    kingBullshit()
     for (let i = 0; i < pieces[curTurn].length; i++) { // checks every piece in the piece dictionary
         // only check what the piece is if the currently sellected cell is the second object of i list in the current turn object of pieces
         if (pieces[curTurn][i][1] == cell) {
@@ -130,10 +145,11 @@ function whatsThatPiece(cell) {
             } if (pieces[curTurn][i][0] == "knight") {
                 knight(cell)
             } if (pieces[curTurn][i][0] == "king") {
+                kingBullshit()
                 king()
             }
         }
-    }   
+    }
 }
 
 
@@ -394,6 +410,7 @@ function collisions(cell) {
                 }
             }
     }
+
     // else push the cells
     // puts the cells that are available for move in a list
     availableCells.push(cell)
@@ -526,13 +543,28 @@ function generatePieces(cell) {
 }
 
 
-function main() {
-    playArea.appendChild(gameBoard())
-
-    for (let i = 0; i < allCells.length; i++) {
-        generatePieces(allCells[i])
+function endGame() {
+    let livePieces = []
+    for (let i = 0; i < pieces[curTurn].length; i++) {
+        livePieces.push(pieces[curTurn][i][0])
     }
+
+    console.log(livePieces)
+    if (livePieces.indexOf("king") >= 0) {
+        alert(`${curTurn} wins`)
+        restart()
+    }
+    
 }
+
+
+function restart() {
+    playArea.removeChild(playArea.firstChild)
+    console.log(playArea.childNodes)
+    main()
+}
+
+
 
 main()
 
