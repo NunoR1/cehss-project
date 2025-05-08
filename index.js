@@ -36,14 +36,14 @@ function main() {
     pieces = {
         "white":
         // white pieces
-        [["rook", "a1"],
+        [["rook", "h6"],
         ["knight", "b1"],
         ["bishop", "c1"],
-        ["queen", "d1"],
-        ["king", "e4"],
+        ["queen", "a6"],
+        ["king", "e1"],
         ["bishop", "f1"],
         ["knight", "g1"],
-        ["rook", "h1"],
+        ["rook", "h3"],
        
         ["pawn", "a2"],
         ["pawn", "b2"],
@@ -56,11 +56,11 @@ function main() {
        
         "black":
         // black pieces
-        [["rook", "a6"],
+        [["rook", "a8"],
         ["knight", "b8"],
         ["bishop", "c8"],
         ["queen", "d8"],
-        ["king", "e8"],
+        ["king", "e5"],
         ["bishop", "f8"],
         ["knight", "g8"],
         ["rook", "h8"],
@@ -114,13 +114,9 @@ function gameBoard(){
                 // movement code
                 if (availableCells.indexOf(cell.id) >= 0) {
                     move(currentCell, this.id)
-                    checkCheck()
-                    console.log(kingThreat)
                 } else if (threatCells.indexOf(cell.id) >= 0) {
                     endGame()
                     kill(this.id)
-                    checkCheck()
-                    console.log(kingThreat)
                 }
                 resetBoard()
                 // identifies the piece on the space
@@ -377,7 +373,6 @@ function kingBullshit() {
             kingPoss[curTurn].push(moveCell)
         }
     }
-    console.log(kingPoss)
 }
 
 // enemy capture code is handled locally in its function
@@ -451,6 +446,8 @@ function move(fromCell, toCell) {
     generatePieces(toCell)
     document.getElementById(fromCell).innerHTML = ""
     
+    checkCheck()
+
     switch (curTurn){
         case "white":
             curTurn = "black"
@@ -464,28 +461,36 @@ function move(fromCell, toCell) {
 }
 
 
-function checkCheck() { // longest function because i didn't have foresight
+// longest function because i didn't have foresight
+function checkCheck() { // checking should be the opponent whenever a piece move and the current turn when the king is moving
     let checkCell
     let kingCell = pieces[opp][4][1]
     let inCheck = false
+    kingThreat[opp] = []
     // account for rooks and queens
-    console.log("checking: " + parseInt(kingCell[1]))
-    for (let i = parseInt(kingCell[1]); i > 8; i++) {
+    console.log("possible before: " + kingPoss[opp])
+    for (let i = 1; i < 9; i++) {
         checkCell = kingCell[0] + i
-        console.log("Check cell: " + checkCell)
-        for (let j = 0; i < pieces[curTurn].length; i++) {
-            if (pieces[curTurn][j][0] == "rook" || pieces[curTurn][j][0] == "queen") {
-                inCheck = true
-                kingThreat[opp].push(pieces[opp][j][1])
+        for (let j = 0; j < pieces[curTurn].length; j++) {
+            if (pieces[curTurn][j][1] == checkCell) {
+                if (pieces[curTurn][j][0] == "rook" || pieces[curTurn][j][0] == "queen") {
+                    inCheck = true
+                    kingThreat[opp].push(pieces[opp][j][1])
+                    kingPoss[opp].splice(kingPoss[opp].indexOf(kingCell[0] + (kingCell[1] + 1)), 1)
+                    kingPoss[opp].splice(kingPoss[opp].indexOf(kingCell[0] + (kingCell[1] - 1)), 1)
+                    console.log("Possible: " + kingPoss[opp])
+                }
             }
         }
     }
+
     // account for bishops and queens
 
     // account for knights
-
+    
     // account for pawns
-
+    
+    console.log(kingThreat)
 }
 
 
