@@ -100,7 +100,7 @@ function gameBoard(){
             cell.id = `${cols[a]}${i}`
             // makes them squares
             cell.style.height = "50px"
-            cell.style.width = "50px"   
+            cell.style.width = "50px"
             // checks for clicks on every space
             // gives them color depending on the location
             if ((a + i) % 2 != 0) { // smart
@@ -110,7 +110,6 @@ function gameBoard(){
             }
             allCells.push(cell.id) // refer to the comment when the variable is initialized
             cell.addEventListener("click", function() {
-                console.log(cell.id)
                 // movement code
                 if (availableCells.indexOf(cell.id) >= 0) {
                     move(currentCell, this.id)
@@ -576,16 +575,17 @@ function generatePieces(cell) {
 
 
 function endGame() {
-    // let livePieces = []
-    // for (let i = 0; i < pieces[curTurn].length; i++) {
-    //     livePieces.push(pieces[curTurn][i][0])
-    // }
+    let livePieces = []
+    for (let i = 0; i < pieces[curTurn].length; i++) {
+        livePieces.push(pieces[curTurn][i][0])
+    }
 
-    // console.log(livePieces)
-    // if (livePieces.indexOf("king") >= 0) {
-    //     alert(`${curTurn} wins`)
-    //     restart()
-    // }    
+    console.log(livePieces)
+    if (livePieces.indexOf("king") >= 0) {
+        alert(`${curTurn} wins`)
+        restart()
+    }
+    
 }
 
 
