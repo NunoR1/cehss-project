@@ -40,7 +40,7 @@ function main() {
         ["knight", "b1"],
         ["bishop", "c1"],
         ["queen", "d1"],
-        ["king", "e1"],
+        ["king", "e4"],
         ["bishop", "f1"],
         ["knight", "g1"],
         ["rook", "h1"],
@@ -56,7 +56,7 @@ function main() {
        
         "black":
         // black pieces
-        [["rook", "a8"],
+        [["rook", "a6"],
         ["knight", "b8"],
         ["bishop", "c8"],
         ["queen", "d8"],
@@ -114,9 +114,13 @@ function gameBoard(){
                 // movement code
                 if (availableCells.indexOf(cell.id) >= 0) {
                     move(currentCell, this.id)
+                    checkCheck()
+                    console.log(kingThreat)
                 } else if (threatCells.indexOf(cell.id) >= 0) {
                     endGame()
                     kill(this.id)
+                    checkCheck()
+                    console.log(kingThreat)
                 }
                 resetBoard()
                 // identifies the piece on the space
@@ -341,6 +345,7 @@ function king() {
     }
 }
 
+
 function kingBullshit() {
     let moveCell
     kingPoss[curTurn] = []
@@ -457,6 +462,32 @@ function move(fromCell, toCell) {
             break
         }
 }
+
+
+function checkCheck() { // longest function because i didn't have foresight
+    let checkCell
+    let kingCell = pieces[opp][4][1]
+    let inCheck = false
+    // account for rooks and queens
+    console.log("checking: " + parseInt(kingCell[1]))
+    for (let i = parseInt(kingCell[1]); i > 8; i++) {
+        checkCell = kingCell[0] + i
+        console.log("Check cell: " + checkCell)
+        for (let j = 0; i < pieces[curTurn].length; i++) {
+            if (pieces[curTurn][j][0] == "rook" || pieces[curTurn][j][0] == "queen") {
+                inCheck = true
+                kingThreat[opp].push(pieces[opp][j][1])
+            }
+        }
+    }
+    // account for bishops and queens
+
+    // account for knights
+
+    // account for pawns
+
+}
+
 
 // resets the chessboard pattern and the available cells
 function resetBoard() {
